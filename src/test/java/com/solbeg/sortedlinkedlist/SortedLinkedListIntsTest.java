@@ -242,4 +242,38 @@ class SortedLinkedListIntsTest {
         Arrays.sort(intsWithNulls, NULLS_LAST_COMPARATOR);
         assertEquals(Arrays.asList(intsWithNulls), sut.toList());
     }
+
+    @Test
+    void shouldAddNullToTheTail() {
+        //GIVEN
+        //WHEN
+        sut.add(null);
+        sut.add(null);
+        sut.add(1024);
+
+        //THEN
+        assertFalse(sut.isEmpty());
+        assertEquals(3, sut.size());
+        assertEquals(1024, sut.get(0));
+        assertNull(sut.get(1));
+        assertNull(sut.get(2));
+    }
+
+    @Test
+    void shouldAddNullsToTheHead() {
+        //GIVEN
+        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS);
+
+        //WHEN
+        sut.add(null);
+        sut.add(null);
+        sut.add(1024);
+
+        //THEN
+        assertFalse(sut.isEmpty());
+        assertEquals(3, sut.size());
+        assertNull(sut.get(0));
+        assertNull(sut.get(1));
+        assertEquals(1024, sut.get(2));
+    }
 }
