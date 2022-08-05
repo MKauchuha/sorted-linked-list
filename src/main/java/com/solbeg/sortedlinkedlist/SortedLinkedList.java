@@ -264,6 +264,30 @@ public class SortedLinkedList<T extends Comparable<T>> implements Iterable<T> {
         }
     }
 
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof SortedLinkedList))
+            return false;
+
+        Iterator<T> thisIterator = iterator();
+        Iterator<?> comparingIterator = ((SortedLinkedList<?>) o).iterator();
+        while (thisIterator.hasNext() && comparingIterator.hasNext()) {
+            T o1 = thisIterator.next();
+            Object o2 = comparingIterator.next();
+            if (!(isNull(o1) ? isNull(o2) : o1.equals(o2)))
+                return false;
+        }
+        return !(thisIterator.hasNext() || comparingIterator.hasNext());
+    }
+
+    public int hashCode() {
+        int hashCode = 1;
+        for (T e : this)
+            hashCode = 31 * hashCode + (e == null ? 0 : e.hashCode());
+        return hashCode;
+    }
+
     private static final class Node<T> {
         private T item;
         private Node<T> next;
