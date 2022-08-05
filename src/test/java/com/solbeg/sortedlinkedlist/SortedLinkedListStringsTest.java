@@ -168,8 +168,6 @@ public class SortedLinkedListStringsTest {
         assertFalse(sut.isEmpty());
         assertEquals(stringsWithNulls.length + strings.length, sut.size());
         assertEquals(joinedList, sut.toList());
-
-        sut.forEach(System.out::println);
     }
 
     @Test
