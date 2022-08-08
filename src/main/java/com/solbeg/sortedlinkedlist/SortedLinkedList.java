@@ -35,10 +35,18 @@ public class SortedLinkedList<T extends Comparable<T>> implements Iterable<T> {
         return size == 0;
     }
 
-    public SortedLinkedList(AddNullsStrategy addNullsStrategy) {
+    public SortedLinkedList(boolean reversed) {
+        this.comparator = reversed
+                ? new ReversedComparator<>(addNullsStrategy)
+                : new DefaultComparator<>(addNullsStrategy);
+    }
+
+    public SortedLinkedList(AddNullsStrategy addNullsStrategy, boolean reversed) {
         this();
         this.addNullsStrategy = addNullsStrategy;
-        this.comparator = new DefaultComparator<>(addNullsStrategy);
+        this.comparator = reversed
+                ? new ReversedComparator<>(addNullsStrategy)
+                : new DefaultComparator<>(addNullsStrategy);
     }
 
     public SortedLinkedList(Collection<? extends T> collection) {
@@ -46,8 +54,8 @@ public class SortedLinkedList<T extends Comparable<T>> implements Iterable<T> {
         addAll(collection);
     }
 
-    public SortedLinkedList(AddNullsStrategy addNullsStrategy, Collection<? extends T> collection) {
-        this(addNullsStrategy);
+    public SortedLinkedList(AddNullsStrategy addNullsStrategy, Collection<? extends T> collection, boolean reversed) {
+        this(addNullsStrategy, reversed);
         addAll(collection);
     }
 
@@ -56,8 +64,8 @@ public class SortedLinkedList<T extends Comparable<T>> implements Iterable<T> {
         addAll(linkedList);
     }
 
-    public SortedLinkedList(AddNullsStrategy addNullsStrategy, SortedLinkedList<? extends T> linkedList) {
-        this(addNullsStrategy);
+    public SortedLinkedList(AddNullsStrategy addNullsStrategy, SortedLinkedList<? extends T> linkedList, boolean reversed) {
+        this(addNullsStrategy, reversed);
         addAll(linkedList);
     }
 
@@ -333,6 +341,26 @@ public class SortedLinkedList<T extends Comparable<T>> implements Iterable<T> {
         }
     }
 
+    private static class ReversedComparator<E extends Comparable<E>> implements Comparator<E> {
+
+        private final AddNullsStrategy addNullsStrategy;
+
+        public ReversedComparator(AddNullsStrategy addNullsStrategy) {
+            this.addNullsStrategy = addNullsStrategy;
+        }
+
+        @Override
+        public int compare(E o1, E o2) {
+            if (o1 == o2)
+                return 0;
+            if (o1 == null)
+                return addNullsStrategy == AddNullsStrategy.LEADING_NULLS ? -1 : 1;
+            if (o2 == null)
+                return addNullsStrategy == AddNullsStrategy.TRAILING_NULLS ? -1 : 1;
+            return o2.compareTo(o1);
+        }
+    }
+
     private class SortedListIterator implements Iterator<T> {
         private SortedLinkedList.Node<T> next;
         private int nextIndex;
@@ -445,7 +473,7 @@ public class SortedLinkedList<T extends Comparable<T>> implements Iterable<T> {
 
         @Override
         public Comparator<? super E> getComparator() {
-            return null; //nul for natural order only
+            return list.comparator;
         }
     }
 }
