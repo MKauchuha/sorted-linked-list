@@ -8,6 +8,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -288,6 +293,14 @@ public class SortedLinkedList<T extends Comparable<T>> implements Iterable<T> {
         return hashCode;
     }
 
+    public Spliterator<T> getSpliterator() {
+        return new SortedListSpliterator<>(this, -1);
+    }
+
+    public Stream<T> stream() {
+        return StreamSupport.stream(getSpliterator(), false);
+    }
+
     private static final class Node<T> {
         private T item;
         private Node<T> next;
@@ -352,6 +365,87 @@ public class SortedLinkedList<T extends Comparable<T>> implements Iterable<T> {
             next = next.next;
             nextIndex++;
             return last;
+        }
+    }
+
+    static class SortedListSpliterator<E extends Comparable<E>> implements Spliterator<E> {
+
+        private static final int BATCH_SIZE = 1024 * 1024;
+        private final SortedLinkedList<E> list;
+        private Node<E> currentNode;
+        private int estSize;
+
+        public SortedListSpliterator(SortedLinkedList<E> list, int estSize) {
+            this.list = list;
+            this.estSize = estSize;
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super E> action) {
+            if (action == null)
+                throw new NullPointerException();
+            if (nonNull(currentNode)) {
+                --estSize;
+                E e = currentNode.item;
+                currentNode = currentNode.next;
+                action.accept(e);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void forEachRemaining(Consumer<? super E> action) {
+            if (action == null) throw new NullPointerException();
+            if (estSize > 0 && currentNode != null) {
+                do {
+                    E e = currentNode.item;
+                    currentNode = currentNode.next;
+                    action.accept(e);
+                } while (currentNode != null && estSize > 0);
+                estSize = 0;
+                currentNode = null;
+            }
+        }
+
+        @Override
+        public Spliterator<E> trySplit() {
+            if (estSize > 1 && nonNull(currentNode)) {
+                int n = Math.min(BATCH_SIZE, estSize);
+                Object[] a = new Object[n];
+                for (int i = 0; i < n && nonNull(currentNode); i++) {
+                    a[i] = currentNode.item;
+                    currentNode = currentNode.next;
+                    estSize--;
+                }
+                return Spliterators.spliterator(a, 0, n, Spliterator.ORDERED);
+            }
+            return null;
+        }
+
+        @Override
+        public long estimateSize() {
+            int s;
+            SortedLinkedList<E> lst;
+            if ((s = estSize) < 0) {
+                if ((lst = list) == null)
+                    s = estSize = 0;
+                else {
+                    currentNode = lst.head;
+                    s = estSize = lst.size;
+                }
+            }
+            return s;
+        }
+
+        @Override
+        public int characteristics() {
+            return Spliterator.ORDERED | Spliterator.SIZED | Spliterator.SUBSIZED | Spliterator.SORTED;
+        }
+
+        @Override
+        public Comparator<? super E> getComparator() {
+            return null; //nul for natural order only
         }
     }
 }
