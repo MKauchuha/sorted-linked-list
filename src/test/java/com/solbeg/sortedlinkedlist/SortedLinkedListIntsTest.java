@@ -61,7 +61,7 @@ class SortedLinkedListIntsTest {
     @Test
     void shouldAddInAscendingOrder_LeadingNullsStrategy() {
         //GIVEN
-        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS);
+        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS, false);
 
         //WHEN
         Stream.of(intsWithNulls).forEach(sut::add);
@@ -118,7 +118,7 @@ class SortedLinkedListIntsTest {
     @Test
     void shouldReturnProperValue() {
         //GIVEN
-        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS);
+        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS, false);
 
         //WHEN
         Stream.of(intsWithNulls).forEach(sut::add);
@@ -136,7 +136,7 @@ class SortedLinkedListIntsTest {
     @Test
     void shouldAddCollection() {
         //GIVEN
-        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS);
+        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS, false);
         List<Integer> joinedList = new ArrayList<>(Arrays.asList(intsWithNulls));
         joinedList.addAll(Arrays.asList(ints));
         joinedList.sort(NULLS_FIRST_COMPARATOR);
@@ -262,7 +262,7 @@ class SortedLinkedListIntsTest {
     @Test
     void shouldAddNullsToTheHead() {
         //GIVEN
-        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS);
+        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS, false);
 
         //WHEN
         sut.add(null);

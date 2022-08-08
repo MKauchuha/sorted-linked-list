@@ -15,62 +15,62 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class SortedLinkedListStringsTest {
+public class SortedLinkedListIntsReversedTest {
 
-    static final Comparator<String> NULLS_LAST_COMPARATOR = Comparator.nullsLast(String::compareTo);
-    static final Comparator<String> NULLS_FIRST_COMPARATOR = Comparator.nullsFirst(String::compareTo);
+    static final Comparator<Integer> NULLS_LAST_COMPARATOR = Comparator.nullsFirst(Integer::compareTo).reversed();
+    static final Comparator<Integer> NULLS_FIRST_COMPARATOR = Comparator.nullsLast(Integer::compareTo).reversed();
+    //GIVEN
+    Integer[] ints;
+    Integer[] intsWithNulls;
 
-    String[] strings;
-    String[] stringsWithNulls;
-
-    SortedLinkedList<String> sut;
+    SortedLinkedList<Integer> sut;
 
     @BeforeEach
     void init() {
-        sut = new SortedLinkedList<>();
-        strings = new String[] {"mn", "cdddd", "ea", "cd", "e", "zzz", "ad", "c", "cba"};
-        stringsWithNulls = new String[]  {"mn", null, "cdddd", "ea", "cd", "e", null, "zzz", "ad", "c", "cba"};
+        sut = new SortedLinkedList<>(true);
+        ints = new Integer[] {100, 4, 25, 17, 150, 11};
+        intsWithNulls = new Integer[] {100, null, 4, 25, 17, null, 150, 11};
     }
 
     @Test
-    void shouldAddInAscendingOrderNonNullsParams() {
+    void shouldAddInDescendingOrderNonNullsParams() {
         //GIVEN
         //WHEN
-        Stream.of(strings).forEach(sut::add);
+        Stream.of(ints).forEach(sut::add);
 
         //THEN
         assertFalse(sut.isEmpty());
-        assertEquals(strings.length, sut.size());
-        Arrays.sort(strings);
-        assertEquals(Arrays.asList(strings), sut.toList());
+        assertEquals(ints.length, sut.size());
+        Arrays.sort(ints, NULLS_LAST_COMPARATOR);
+        assertEquals(Arrays.asList(ints), sut.toList());
     }
 
     @Test
     void shouldAddInAscendingOrder_TrailingNullsStrategy() {
         //GIVEN
         //WHEN
-        Stream.of(stringsWithNulls).forEach(sut::add);
+        Stream.of(intsWithNulls).forEach(sut::add);
 
         //THEN
         assertFalse(sut.isEmpty());
-        assertEquals(stringsWithNulls.length, sut.size());
-        Arrays.sort(stringsWithNulls, NULLS_LAST_COMPARATOR);
-        assertEquals(Arrays.asList(stringsWithNulls), sut.toList());
+        assertEquals(intsWithNulls.length, sut.size());
+        Arrays.sort(intsWithNulls, NULLS_LAST_COMPARATOR);
+        assertEquals(Arrays.asList(intsWithNulls), sut.toList());
     }
 
     @Test
     void shouldAddInAscendingOrder_LeadingNullsStrategy() {
         //GIVEN
-        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS, false);
+        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS, true);
 
         //WHEN
-        Stream.of(stringsWithNulls).forEach(sut::add);
+        Stream.of(intsWithNulls).forEach(sut::add);
 
         //THEN
         assertFalse(sut.isEmpty());
-        assertEquals(stringsWithNulls.length, sut.size());
-        Arrays.sort(stringsWithNulls, NULLS_FIRST_COMPARATOR);
-        assertEquals(Arrays.asList(stringsWithNulls), sut.toList());
+        assertEquals(intsWithNulls.length, sut.size());
+        Arrays.sort(intsWithNulls, NULLS_FIRST_COMPARATOR);
+        assertEquals(Arrays.asList(intsWithNulls), sut.toList());
     }
 
     @Test
@@ -86,11 +86,11 @@ public class SortedLinkedListStringsTest {
     void shouldRiseIndexOutOfBoundException() {
         //GIVEN
         //WHEN
-        Stream.of(strings).forEach(sut::add);
+        Stream.of(ints).forEach(sut::add);
 
         //THEN
         assertFalse(sut.isEmpty());
-        assertThrows(IndexOutOfBoundsException.class, () -> sut.get(strings.length));
+        assertThrows(IndexOutOfBoundsException.class, () -> sut.get(ints.length));
         assertThrows(IndexOutOfBoundsException.class, () -> sut.get(-1));
     }
 
@@ -107,7 +107,7 @@ public class SortedLinkedListStringsTest {
     void shouldClearList() {
         //GIVEN
         //WHEN
-        Stream.of(strings).forEach(sut::add);
+        Stream.of(ints).forEach(sut::add);
         sut.clear();
 
         //THEN
@@ -118,55 +118,55 @@ public class SortedLinkedListStringsTest {
     @Test
     void shouldReturnProperValue() {
         //GIVEN
-        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS, false);
+        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS, true);
 
         //WHEN
-        Stream.of(stringsWithNulls).forEach(sut::add);
+        Stream.of(intsWithNulls).forEach(sut::add);
 
         //THEN
         assertFalse(sut.isEmpty());
-        assertEquals(stringsWithNulls.length, sut.size());
+        assertEquals(intsWithNulls.length, sut.size());
 
-        Arrays.sort(stringsWithNulls, NULLS_FIRST_COMPARATOR);
-        for (int i = 0; i < stringsWithNulls.length; i++) {
-            assertEquals(stringsWithNulls[i], sut.get(i));
+        Arrays.sort(intsWithNulls, NULLS_FIRST_COMPARATOR);
+        for (int i = 0; i < intsWithNulls.length; i++) {
+            assertEquals(intsWithNulls[i], sut.get(i));
         }
     }
 
     @Test
     void shouldAddCollection() {
         //GIVEN
-        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS, false);
-        List<String> joinedList = new ArrayList<>(Arrays.asList(stringsWithNulls));
-        joinedList.addAll(Arrays.asList(strings));
+        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS, true);
+        List<Integer> joinedList = new ArrayList<>(Arrays.asList(intsWithNulls));
+        joinedList.addAll(Arrays.asList(ints));
         joinedList.sort(NULLS_FIRST_COMPARATOR);
 
         //WHEN
-        Stream.of(stringsWithNulls).forEach(sut::add);
-        sut.addAll(Arrays.asList(strings));
+        Stream.of(intsWithNulls).forEach(sut::add);
+        sut.addAll(Arrays.asList(ints));
 
         //THEN
         assertFalse(sut.isEmpty());
-        assertEquals(stringsWithNulls.length + strings.length, sut.size());
+        assertEquals(intsWithNulls.length + ints.length, sut.size());
         assertEquals(joinedList, sut.toList());
     }
 
     @Test
     void shouldAddAnotherLinkedList() {
         //GIVEN
-        List<String> joinedList = new ArrayList<>(Arrays.asList(stringsWithNulls));
-        joinedList.addAll(Arrays.asList(strings));
+        List<Integer> joinedList = new ArrayList<>(Arrays.asList(intsWithNulls));
+        joinedList.addAll(Arrays.asList(ints));
         joinedList.sort(NULLS_LAST_COMPARATOR);
 
-        sut = new SortedLinkedList<>(Arrays.asList(stringsWithNulls));
-        SortedLinkedList<String> secondList = new SortedLinkedList<>(Arrays.asList(strings));
+        sut = new SortedLinkedList<>(AddNullsStrategy.TRAILING_NULLS, Arrays.asList(intsWithNulls), true);
+        SortedLinkedList<Integer> secondList = new SortedLinkedList<>(Arrays.asList(ints));
 
         //WHEN
         sut.addAll(secondList);
 
         //THEN
         assertFalse(sut.isEmpty());
-        assertEquals(stringsWithNulls.length + strings.length, sut.size());
+        assertEquals(intsWithNulls.length + ints.length, sut.size());
         assertEquals(joinedList, sut.toList());
     }
 
@@ -176,21 +176,21 @@ public class SortedLinkedListStringsTest {
         int idx = 2;
 
         //WHEN
-        sut.addAll(Arrays.asList(strings));
-        String removedValue = sut.remove(idx);
+        sut.addAll(Arrays.asList(ints));
+        Integer removedValue = sut.remove(idx);
 
         //THEN
         assertFalse(sut.isEmpty());
-        assertEquals(strings.length - 1, sut.size());
-        Arrays.sort(strings);
-        assertEquals(strings[idx], removedValue);
+        assertEquals(ints.length - 1, sut.size());
+        Arrays.sort(ints, NULLS_LAST_COMPARATOR);
+        assertEquals(ints[idx], removedValue);
     }
 
     @Test
     void shouldRemoveAllElement_OneByOne_StartingFromHead() {
         //GIVEN
         //WHEN
-        sut.addAll(Arrays.asList(stringsWithNulls));
+        sut.addAll(Arrays.asList(intsWithNulls));
         while (!sut.isEmpty()) {
             sut.remove(0);
         }
@@ -204,7 +204,7 @@ public class SortedLinkedListStringsTest {
     void shouldRemoveAllElement_OneByOne_StartingFromTail() {
         //GIVEN
         //WHEN
-        sut.addAll(Arrays.asList(stringsWithNulls));
+        sut.addAll(Arrays.asList(intsWithNulls));
         while (!sut.isEmpty()) {
             sut.remove(sut.size() - 1);
         }
@@ -218,9 +218,9 @@ public class SortedLinkedListStringsTest {
     void shouldRemoveAllElement_PresentsInCollection() {
         //GIVEN
         //WHEN
-        sut.addAll(Arrays.asList(stringsWithNulls));
-        for (int i = 0; i < stringsWithNulls.length; i++) {
-            sut.remove(stringsWithNulls[i]);
+        sut.addAll(Arrays.asList(intsWithNulls));
+        for (int i = 0; i < intsWithNulls.length; i++) {
+            sut.remove(intsWithNulls[i]);
         }
 
         //THEN
@@ -232,15 +232,15 @@ public class SortedLinkedListStringsTest {
     void shouldNotRemoveValueWhenObjectIsNotPresent() {
         //GIVEN
         //WHEN
-        sut.addAll(Arrays.asList(stringsWithNulls));
-        String removedValue = sut.remove("Not present string");
+        sut.addAll(Arrays.asList(intsWithNulls));
+        Integer removedValue = sut.remove(Integer.valueOf(1024));
 
         //THEN
         assertNull(removedValue);
         assertFalse(sut.isEmpty());
-        assertEquals(stringsWithNulls.length, sut.size());
-        Arrays.sort(stringsWithNulls, NULLS_LAST_COMPARATOR);
-        assertEquals(Arrays.asList(stringsWithNulls), sut.toList());
+        assertEquals(intsWithNulls.length, sut.size());
+        Arrays.sort(intsWithNulls, NULLS_LAST_COMPARATOR);
+        assertEquals(Arrays.asList(intsWithNulls), sut.toList());
     }
 
     @Test
@@ -249,12 +249,12 @@ public class SortedLinkedListStringsTest {
         //WHEN
         sut.add(null);
         sut.add(null);
-        sut.add("1024");
+        sut.add(1024);
 
         //THEN
         assertFalse(sut.isEmpty());
         assertEquals(3, sut.size());
-        assertEquals("1024", sut.get(0));
+        assertEquals(1024, sut.get(0));
         assertNull(sut.get(1));
         assertNull(sut.get(2));
     }
@@ -262,18 +262,18 @@ public class SortedLinkedListStringsTest {
     @Test
     void shouldAddNullsToTheHead() {
         //GIVEN
-        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS, false);
+        sut = new SortedLinkedList<>(AddNullsStrategy.LEADING_NULLS, true);
 
         //WHEN
         sut.add(null);
         sut.add(null);
-        sut.add("1024");
+        sut.add(1024);
 
         //THEN
         assertFalse(sut.isEmpty());
         assertEquals(3, sut.size());
         assertNull(sut.get(0));
         assertNull(sut.get(1));
-        assertEquals("1024", sut.get(2));
+        assertEquals(1024, sut.get(2));
     }
 }
