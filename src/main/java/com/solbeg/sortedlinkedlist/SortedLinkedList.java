@@ -354,7 +354,7 @@ public class SortedLinkedList<T extends Comparable<T>> implements Iterable<T> {
             if (o1 == o2)
                 return 0;
             if (o1 == null)
-                return addNullsStrategy == AddNullsStrategy.LEADING_NULLS ? -1 : 1;
+                return addNullsStrategy == AddNullsStrategy.LEADING_NULLS ? 1 : -1;
             if (o2 == null)
                 return addNullsStrategy == AddNullsStrategy.TRAILING_NULLS ? -1 : 1;
             return o2.compareTo(o1);
